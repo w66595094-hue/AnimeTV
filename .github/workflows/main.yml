@@ -1,0 +1,35 @@
+name: Build AnimeTV APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Build Android APKs
+        run: |
+          cd android
+          java -Xmx2g -classpath gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain assembleMobileDebug assembleTvDebug
+
+      - name: Upload APK files
+        uses: actions/upload-artifact@v4
+        with:
+          name: AnimeTV-APK
+          path: |
+            android/app/build/outputs/apk/mobile/debug/*.apk
+            android/app/build/outputs/apk/tv/debug/*.apk
+          if-no-files-found: error
